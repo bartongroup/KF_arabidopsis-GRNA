@@ -1,0 +1,141 @@
+# Description of all tests and tools for the null (same condition) test.
+# 
+# name = name of the test to be displayed
+# repflie = format for bootstrap results (an FCP file) for all replicates (%d stands for replicate number)
+# sp_repfile = for spike-in bootstrap results (FCP file)
+# fullfile = result (FCP file) for full clean replicate set
+# adjustment = multiple test adjustment used by the tool to obtain p-values (none, BH or HB)
+# FCsig = optional sign correction for fold-change (+1 or -1)
+#
+# FCP files are tab-delimited with (at least) three columns: gene id, log2 fold change and p-value.
+
+TEST cuffdiff
+name = cuffdiff
+repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/fpr_bootstraps/nospikes_2/cuffdiff/de_cuffdiffq_rep%d.tsv
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/fpr_bootstraps_spikes/cuffdiff/de_cuffdiff_rep%d.tsv
+fullfile = de_dummy_truth.tsv
+adjustment = bh
+FCsig = 1
+
+TEST t
+name = t-test
+repfile = DE/WT3_t-test_equal_100_%d.sqlite
+sp_repfile = de_tests_sp_db/de_t_rep%d.tsv
+fullfile = de_dummy_truth.tsv
+adjustment = none
+FCsig = 1
+
+TEST lt
+name = log t-test
+repfile = de_tests_db/de_lt_sameWT_rep%d.tsv
+sp_repfile = de_tests_sp_db/de_lt_rep%d.tsv
+fullfile = WT_Snf2_deseq_clean_lt_test.tsv
+adjustment = none
+FCsig = 1
+
+TEST st
+name = shrinkage log t-test
+repfile = de_tests_db/de_st_sameWT_rep%d.tsv
+sp_repfile = de_tests_sp_db/de_st_rep%d.tsv
+fullfile = de_dummy_truth.tsv
+adjustment = none
+FCsig = 1
+
+TEST mw
+name = Mann-Whitney
+repfile = de_tests_db/de_mw_sameWT_rep%d.tsv
+sp_repfile = de_tests_sp_db/de_mw_rep%d.tsv
+fullfile = de_dummy_truth.tsv
+adjustment = none
+FCsig = 1
+
+TEST bayseq
+name = baySeq
+repfile = DGE_FDR_out/AtWT_bayseq_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/baySeq/baySeq_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
+TEST degseq
+name = DEGseq
+repfile = DGE_FDR_out/AtWT_degseq_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/DEGseq/DEGseq_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = 1
+
+TEST deseq1
+name = DEseq1
+repfile = DGE_FDR_out/AtWT_deseq_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/deseq/deseq_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
+
+TEST deseq2
+name = DEseq2
+repfile = DGE_FDR_out/AtWT_deseq2_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/deseq/deseq_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
+TEST ebseq
+name = EBSeq
+repfile = DGE_FDR_out/AtWT_ebseq_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/deseq/deseq_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
+
+TEST edger
+name = edgeR
+repfile = DGE_FDR_out/AtWT_edgeR_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/edgeR/edgeR_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
+TEST edgerglm
+name = edgeRGLM
+repfile = DGE_FDR_out/AtWT_edgeRglm_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/edgeR/edgeR_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
+TEST limma
+name = limma
+repfile = DGE_FDR_out/AtWT_limma_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/limma/limma_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
+TEST noiseq
+name = NOISeq
+repfile = DGE_FDR_out/AtWT_noiseq_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/noiseq/noiseq_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
+TEST poissonseq
+name = PoissonSeq
+repfile = DGE_FDR_out/AtWT_poissonseq_100_%d.sqlite
+sp_repfile = -
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = 1
+
+TEST samseq
+name = samSeq
+repfile = DGE_FDR_out/AtWT_samseq_100_%d.sqlite
+sp_repfile = /cluster/gjb_lab/cdr/GRNAseq/analysis/bootstraps_with_spike_ins/samr/samr_%dreps_package_default.tsv
+fullfile = /homes/kfroussios/Projects/AtWTdist/DGE_FDR_dummy-truth.tsv
+adjustment = bh
+FCsig = -1
+
