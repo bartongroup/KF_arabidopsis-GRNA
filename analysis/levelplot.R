@@ -1,13 +1,15 @@
+args <- commandArgs(trailingOnly=TRUE)
+
 # Setup variable parameters.
-WORKPATH <- "~/Projects/AtWTdist/results/"
-VALFILE <- "AtWT-unlev.tsv_cors.csv"
+WORKPATH <- getwd()
+VALFILE <- args[[1]]
 Headers <- TRUE
 RowLabels <- TRUE
 Title <- "\nInter-Replicate Correlation"
 XLabel <- YLabel <- "Replicate"
 
 # Import data.
-VALS <- read.csv( paste(WORKPATH, VALFILE, sep=""), header=Headers)
+VALS <- read.table(file.path(WORKPATH, VALFILE), header=Headers)
 # Set up row labels
 if (RowLabels == TRUE) {
     rn <- VALS[,1]
@@ -33,7 +35,7 @@ myPalette <- colorRampPalette(c("darkred", "white"))(40)
 
 
 # Draw the image.
-pdf(paste(WORKPATH, VALFILE, "_heat.pdf", sep=""))
+pdf(paste0(file.path(WORKPATH, VALFILE), '_heat.pdf'))
 levelplot(as.matrix(VALS), col.regions=myPalette, scales=list(x=list(rot=90)),
           xlab=XLabel, ylab=YLabel, main=Title, cuts= length(myPalette)-1)
 dev.off()

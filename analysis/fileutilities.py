@@ -4,7 +4,7 @@
 
 Author: Kimon Froussios
 Compatibility tested: python 3.5.2
-Last reviewed: 13/01/2017
+Last reviewed: 20/11/2017
 
 This module is a solution for Frequently Performed Generic Tasks that involve 
 multiple files:
@@ -38,22 +38,6 @@ Execute with -h in a shell to obtain syntax and help.
 # solely for custom use. When appropriate these custom labels will be included in 
 # the output.
 
-####### TODO SUGGESTIONS #######
-#
-#
-################################
-
-######## UPDATES ###############
-#
-# 2016-04-13 : Range support added to --cols. Closed-end ranges only.
-# 2016-04-13 : Get columns by name support added to --cols.
-# 2016-04-13 : Multiple ranges support added for --loop R. NEW SYNTAX!
-# 2016-04-13 : Comma separated value support added to TARGET and --cols ONLY! Old syntax also retained.
-#              Comma lists are not practical for other flags as they accept regex strings. 
-# 2016-04-13 : Added option to retain fixed number of metadata lines at the top of the files
-#              --cols, --rndcols and --appnd.
-#
-################################
 
 import os, sys, string, re, subprocess, random, argparse
 import pandas as pd
@@ -319,7 +303,7 @@ def make_names(items, parameters):
                     the output names.
         parameters(str,str,str): The first element is the output directory, 
                     the second is a common prefix to add to the names, 
-                    the third is a common sufix to add to the names.
+                    the third is a common suffix to add to the names.
                     Like so: <out[0]>/<out[1]>item<out[2] .
                     If any of the 3 values in None, no outnames will be made.
                     Use current directory and empty strings as necessary.
@@ -329,8 +313,8 @@ def make_names(items, parameters):
     outfiles = []
     if None not in parameters:
         for i in items:
-            outfiles.append(os.path.join(os.path.abspath(os.path.expanduser(parameters[0])), 
-                                         parameters[1] + os.path.splitext(os.path.basename(str(i)))[0] + parameters[2]) )
+            outfiles.append(os.path.join(os.path.abspath(os.path.expanduser(parameters[0])),
+                                         parameters[1] + i + parameters[2]) )
         autonumerate(outfiles)
     return outfiles
 
@@ -341,25 +325,27 @@ def do_foreach(flist, comm, comments=False, progress=True, out=(None,None,None),
     Enables executing a shell command over a range of items, by inserting the
     item values into the command as directed by place-holder substrings.
     Although the above is how it is meant to be used, the values in the
-    FilesList could be overridden to be any arbitrary string, in which case
-    only two of the placeholders will work correctly (full and alias). The
-    others are computed from these and may not be sensible when the items are
-    not file paths.
+    FilesList could be overridden to be any arbitrary string, in which case,
+    only {val} will have the desired effect. The other placeholder values are
+    computed with the assumption of the values being files, so may not be
+    sensible when the items are not files.
     
     This is the only function with comments or progress attributes, because 
     invoked commands print their own output directly, so any informative messages 
-    controlled by this library need to also be inserted in real time.
+    controlled by this library will need to be inserted in real time.
     
     Args:
         flist[]: A FilesList. If a plain list is given, aliases will be 
                     automatically computed.
-        comm[str]: The components of an arbitrary command, with place-holders
-                    for the item of each iteration. Placeholder strings are:
-                    '***full***' : absolute path of file.
-                    '***path***' : absolute path to the file.
-                    '***file***' : filename without path.
-                    '***core***' : filename without the last extension.
-                    '***alias***': alias for file, by default same as core.
+        comm[str]: The components of an arbitrary command, with place-holders:
+                    {abs} : absolute path of file.
+                    {dir} : absolute path of the file's directory.
+                    {val} : the actual value specified as target
+                    {bas} : the basename of the file, without the last extension.
+                    {alias}: the alias for the file, if iterating through a FilesList.
+                    Placeholders can be nested, to allow nested calls of fileutilities:
+                    i.e. {{abs}}. A layer of nesting is peeled off each time the function is called,
+                    until the placeholders are allowed to be evaluated.
         comments(bool): Print commented call details to STDOUT. (Default False)
         progress(bool): Show start and completion of iterations on STDERR. 
                     (Default True)
@@ -381,12 +367,21 @@ def do_foreach(flist, comm, comments=False, progress=True, out=(None,None,None),
         # Substitute place-holders.
         command = []
         for c in comm:
+            # Evaluate placeholders, if they are not nested.
             (mypath, mybase) = os.path.split(str(myfile))
-            c = c.replace("***full***", str(myfile))
-            c = c.replace("***path***", mypath)
-            c = c.replace("***file***", mybase)
-            c = c.replace("***core***", os.path.splitext(mybase)[0])
-            c = c.replace("***alias***", str(myalias))
+            c = re.sub(r"(?<!\{){abs}(?!\})", str(myfile), c)
+            c = re.sub(r"(?<!\{){dir}(?!\})", mypath, c)
+            c = re.sub(r"(?<!\{){val}(?!\})", mybase, c)
+            c = re.sub(r"(?<!\{){bas}(?!\})", os.path.splitext(mybase)[0], c)
+            c = re.sub(r"(?<!\{){ali}(?!\})", str(myalias), c)
+            # Peel off a layer of nesting for the remaining placeholders and flags.
+            c = c.replace('{{abs}}', '{abs}')
+            c = c.replace('{{dir}}', '{dir}')
+            c = c.replace('{{val}}', '{val}')
+            c = c.replace('{{bas}}', '{bas}')
+            c = c.replace('{{ali}}', '{ali}')
+            c = c.replace('++-', '+-')
+            # This argument is ready to go now.
             command.append(c)
         # Redirect output.
         if outfiles:
@@ -395,14 +390,14 @@ def do_foreach(flist, comm, comments=False, progress=True, out=(None,None,None),
         try:
             see = " ".join(command)
             if log:
-                ml.log_message(message=see, logfile="./commands.log")
+                ml.log_message(message=see, logfile="./subcommands.log")
             if comments and out == (None,None):
                 outstream.write(ml.infostring("CWD: "+ os.getcwd() +"\tDO: "+ see))
             if progress:
                 sys.stderr.write(ml.infostring("DO: "+ see))
         except IOError:
             pass
-        subprocess.call(command, stdout=outstream, shell=False)
+        subprocess.call(" ".join(command), stdout=outstream, shell=True)
         # Optionally identify iteration.
         try:
             if comments and out == (None,None):
@@ -1333,7 +1328,8 @@ def main(args):
     parser.add_argument('-O','--out', type=str, nargs=3,
                                 help=" Send individual outputs to individual files instead of \
                                 merging them to STDOUT. Output files will be like \
-                                <out[0]>/<out[1]>target<out[2]>")
+                                <out[0]>/<out[1]>target<out[2]>, where target is stripped of \
+                                any directory path and its outermost file extension.")
     # Parameters.
     parser.add_argument('-L','--log', action='store_true',
                                 help=" Log this command to ./commands.log.")
@@ -1367,14 +1363,16 @@ def main(args):
                                 otherwise the aliases or basenames will be used, enumerated when necessary.")
     parser.add_argument('--loop', type=str, nargs='+',
                                 help=" Repeat the specified shell command for each target value. \
-                                The fist value of this parameter determines what the target values are: \
-                                'S'= strings: paths/files/strings, 'R'= range: ranges of positive integers in x:y format. \
-                                Target PLACEHOLDERS: ***full***, ***path***, ***file***, \
-                                ***core***, ***alias***. \
-                                If looping over a NUMERICAL RANGE use any of the last 3 placeholders. \
-                                The nested command should be supplied as a list of components, not as a single string. \
-                                Options intended for the nested command should be preceded \
-                                by a '+' sign like this: '+-v'.")
+                                The first value of this parameter determines what the target values are: \
+                                'S'= strings, including paths or files, 'R'= numeric ranges of positive integers in from:to (inclusive) format. \
+                                Available PLACEHOLDERS to insert the targets into the commands: \
+                                {abs} full path, {dir} path of directory portion, {val} target value such as filename, \
+                                {bas} basename (filename minus outermost extension), {ali} file alias. \
+                                Flags intended for the nested command should be preceded \
+                                by a '+' sign like this: '+-v'. Recursive calls to fileutilities.py are possible by \
+                                nesting the placeholders and escapes: i.e. {{abs}}, ++-v. One layer is peeled off \
+                                with each call to fileutilities loop. The placeholders will take the values \
+                                of the targets of the respectively nested call.")
     # Delimited file tasks.
     parser.add_argument('--swap', type=str,
                                 help=" Replace all occurrences of the --sep values with the value supplied here.\

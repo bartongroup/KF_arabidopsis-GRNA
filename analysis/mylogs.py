@@ -3,8 +3,7 @@
 """mylogs.py
 
 Author: Kimon Froussios
-Compatibility tested: python 2.7.3, 3.5.2
-Last revised: 19/04/2017
+Last revised: 27/10/2017
 
 Library for custom logging.
 
@@ -32,6 +31,36 @@ def tstamp():
     return str(datetime.datetime.now())
 
 
+def escapise(comnd):
+    """Escape special characters in command.
+
+    Any special characters would have arrived here by having been escaped in the command line.
+    To log the command in a way it can be reused as-is, escapes must be re-added.
+
+    Args:
+        comnd[str]: List of strings to sanitise.
+    Returns:
+        [str]
+    """
+    for i,c in enumerate(comnd):
+        # Sometimes an empty string is an argument. That needs to be quoted for the log.
+        if c == '':
+            comnd[i] = '\'\''
+        else:
+            comnd[i] = c.translate(str.maketrans({"\\": r"\\",
+                                                  "\"": r"\"",
+                                                  "\'": r"\'",
+                                                  "$": r"\$",
+                                                  "\t": r"$'\t'",
+                                                  ">": r"\>",
+                                                  "<": r"\<",
+                                                  "|": r"\|",
+                                                  "*": r"\*",
+                                                  "#": r"\#",
+                                                  "%": r"\%"}))
+    return comnd
+
+
 def paramstring(message=""):
     """Execution parameters log-string.
     
@@ -42,8 +71,10 @@ def paramstring(message=""):
     Returns:
         (str)
     """
-    message.rstrip().replace("\n"," ")
-    return "###INFO### "+ tstamp() +"\t"+ " ".join(sys.argv) +"\n###INFO### \t\t\t\t### CWD: " + os.getcwd() + "  ### PYTHON: " + sys.executable + ("\n###INFO### " if message else "") + message + "\n"
+    message.rstrip().replace("\n", " ")
+    return "###INFO### " + tstamp() + "\t" + " ".join(
+        sys.argv) + "\n###INFO### \t\t\t\t### CWD: " + os.getcwd() + "  ### PYTHON: " + sys.executable + (
+               "\n###INFO### " if message else "") + message + "\n"
 
 
 def donestring(message=""):
@@ -56,8 +87,8 @@ def donestring(message=""):
     Returns:
         (str)
     """
-    message.rstrip().replace("\n"," ")
-    return "###INFO### " + tstamp() + "\t" + os.path.basename(sys.argv[0]) + " - " + "Done "+ message +".\n"
+    message.rstrip().replace("\n", " ")
+    return "###INFO### " + tstamp() + "\t" + os.path.basename(sys.argv[0]) + " - " + "Done " + message + ".\n"
 
 
 def infostring(message=""):
@@ -70,8 +101,8 @@ def infostring(message=""):
     Returns:
         (str)
     """
-    message.rstrip().replace("\n"," ")
-    return "###INFO### " + tstamp() + "\t" + os.path.basename(sys.argv[0]) + " - " + message +"\n"
+    message.rstrip().replace("\n", " ")
+    return "###INFO### " + tstamp() + "\t" + os.path.basename(sys.argv[0]) + " - " + message + "\n"
 
 
 def warnstring(message=""):
@@ -82,8 +113,8 @@ def warnstring(message=""):
     Returns:
         (str)
     """
-    message.rstrip().replace("\n"," ")
-    return "#WARNING!# " + tstamp() + "\t" + os.path.basename(sys.argv[0]) + " - " + message +"\n"
+    message.rstrip().replace("\n", " ")
+    return "#WARNING!# " + tstamp() + "\t" + os.path.basename(sys.argv[0]) + " - " + message + "\n"
 
 
 def errstring(message=""):
@@ -94,11 +125,11 @@ def errstring(message=""):
     Returns:
         (str)
     """
-    message.rstrip().replace("\n"," ")
-    return "##!ERROR!# " + tstamp() + "\t" + os.path.basename(sys.argv[0]) + " - " + message +"\n"
+    message.rstrip().replace("\n", " ")
+    return "##!ERROR!# " + tstamp() + "\t" + os.path.basename(sys.argv[0]) + " - " + message + "\n"
 
 
-def log_command(message="", logfile = "./commands.log" ):
+def log_command(message="", logfile="./commands.log"):
     """Record timestamp, command-line call and optional message.
     
     This function obtains the command from sys.argv[].
@@ -107,15 +138,13 @@ def log_command(message="", logfile = "./commands.log" ):
         message(str): Message to record in the log. (Default empty)
         logfile(str): File to write to (./commands.log).
     """
-    with open(logfile,'a') as comlog:
+    cmnd = " ".join(sys.argv[:2]) + ' ' + " ".join(escapise(sys.argv[2:]))
+    with open(logfile, 'a') as comlog:
         if message == "":
-            comlog.write(tstamp() + "\t" + str(sys.executable) + " " + " ".join(sys.argv).replace("$", "\$") + "\n")  # Automatically escape bash variables. 
-                                                                                                                      # If a variable's name is in the command arguments, it was entered in escaped form, 
-                                                                                                                      # otherwise the command would include the dereferenced value instead of the name, but the
-                                                                                                                      # escape char is removed when the string is evaluated by bash. So I need to add it back for a correct log.
+            comlog.write(tstamp() + "\t" + str(sys.executable) + " " + cmnd + "\n")
         else:
-            comlog.write(tstamp() + "\t" + str(sys.executable) + " " + " ".join(sys.argv) + "\n" + "          " + message.rstrip().replace("\n","\n          ") + "\n")
-        
+            comlog.write(tstamp() + "\t" + str(sys.executable) + " " + cmnd + "\n" + "                          \t" + message.rstrip().replace("\n", "\n          ") + "\n")
+
 
 def log_message(message="", logfile="./messages.log"):
     """Record timestamp and message.
@@ -126,9 +155,8 @@ def log_message(message="", logfile="./messages.log"):
         message(str): Message to record in the log. (Default empty)
         logfile(str): File to write to. (./messages.log)
     """
-    with open(logfile,'a') as comlog:
-        comlog.write(tstamp() + "\t" + message.rstrip().replace("\n","\n          ") + "\n")
-    
+    with open(logfile, 'a') as comlog:
+        comlog.write(tstamp() + "\t" + message.rstrip().replace("\n", "\n          ") + "\n")
 
 
 ######################
@@ -137,19 +165,17 @@ def log_message(message="", logfile="./messages.log"):
 
 
 if __name__ == "__main__":
-    
+
     if sys.argv[1] == "-e":
         # Log command and run it.
-        log_message(message = " ".join(sys.argv[2:]).replace("$", "\$"), logfile = "commands.log")
-        subprocess.call(sys.argv[2:], stdout = sys.stdout, shell = False)
-    else:
+        c = " ".join(sys.argv[2:])
+        log_command()
+        log_message(message=c, logfile="./subcommands.log")
+        subprocess.call(c, shell=True, stdout=sys.stdout)
+    elif sys.argv[1] == "-m":
         # Log message.
-        try:
-            log_message(message = sys.argv[1], logfile = sys.argv[2])
-        except IndexError:
-            # No logfile provided, use default.
-            log_message(message = sys.argv[1])
-    
+        log_message(message=" ".join(escapise(sys.argv[2:])))
+
     sys.exit(0)
-    
-#EOF
+
+# EOF
