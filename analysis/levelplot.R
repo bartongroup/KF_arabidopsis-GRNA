@@ -7,17 +7,11 @@ Headers <- TRUE
 RowLabels <- TRUE
 Title <- "\nInter-Replicate Correlation"
 XLabel <- YLabel <- "Replicate"
+outliers = c(11)
+outliernames = c("AtWT_11")
 
 # Import data.
-VALS <- read.table(file.path(WORKPATH, VALFILE), header=Headers)
-# Set up row labels
-if (RowLabels == TRUE) {
-    rn <- VALS[,1]
-    # Get rid of the useless first column.
-    VALS <- VALS[,2:length(VALS[1,])]
-    rownames(VALS) <- rn
-}
-#View(VALS)
+VALS <- read.table(file.path(WORKPATH, VALFILE), header=Headers, sep="\t")
 
 # OPTIONAL log tranform of values
 #VALS <- log(VALS)
@@ -35,15 +29,13 @@ myPalette <- colorRampPalette(c("darkred", "white"))(40)
 
 
 # Draw the image.
-pdf(paste0(file.path(WORKPATH, VALFILE), '_heat.pdf'))
+pdf(file=paste0(file.path(WORKPATH, VALFILE), '_heat.pdf'), onefile=TRUE)
 levelplot(as.matrix(VALS), col.regions=myPalette, scales=list(x=list(rot=90)),
           xlab=XLabel, ylab=YLabel, main=Title, cuts= length(myPalette)-1)
 dev.off()
 
 # Draw without outliers.
-outliers = c(11)
-outliernames = c("AtWT_11")
-pdf(paste(WORKPATH, VALFILE, "_heat_fltr.pdf", sep=""))
+pdf(file=paste0(file.path(WORKPATH, VALFILE), "_heat_fltr.pdf", sep=""))
 levelplot(as.matrix(VALS[-outliers, ! names(VALS) %in% outliernames]), col.regions=myPalette, scales=list(x=list(rot=90)),
           xlab=XLabel, ylab=YLabel, main=paste(Title, "- filtered", seq=""), cuts= length(myPalette)-1)
 dev.off()
