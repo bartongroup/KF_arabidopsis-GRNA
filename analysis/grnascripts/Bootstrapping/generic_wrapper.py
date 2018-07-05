@@ -452,12 +452,12 @@ try:
     from optparse import OptionParser, OptionGroup
     from pysqlite2 import dbapi2 as sqlite3
     from scipy.stats import mstats as mst
-    from Modules.housekeeping import custom_formatwarning
-    from Modules.housekeeping import parse_required_options
-    from Modules.housekeeping import parse_allowed_values
-    from Modules.housekeeping import parse_option_type
-    from Modules.housekeeping import timeStr, createNewTempdir
-    from Modules.housekeeping import write_log_header
+    from housekeeping import custom_formatwarning
+    from housekeeping import parse_required_options
+    from housekeeping import parse_allowed_values
+    from housekeeping import parse_option_type
+    from housekeeping import timeStr, createNewTempdir
+    from housekeeping import write_log_header
 except ImportError as e:
     print "\nSomething went wrong when importing the required modules. Its " \
           "probably something to do with you not having the right bits in " \
@@ -3156,7 +3156,7 @@ if __name__ == '__main__':
                      "help":    "Set the q to use to run cluster jobs. " \
                                 "Default is c6145.q.",
                      "group":   None,
-                     "default": "c6145.q"
+                     "default": "all.q"
                     })
     optslist.append({
                      "short":    None,
