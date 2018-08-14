@@ -36,7 +36,7 @@ use Tools;
 use Stats;
 
 Stamp();
-my $cwd = getcwd; 
+my $cwd = getcwd;
 $| = 1;
 
 my $script = "one_bs_powerstats.pl";
@@ -52,7 +52,7 @@ my $testinfofile = './de_tests.txt';
 my $powerdir = './powerstats_db_ref';
 my $maxn = 40;
 my $alpha = 0.05;
-my $queue = '64bit-pri.q,64bit.q,c6145.q';
+my $queue = '';
 my $genlist = 'genlist.tsv';
 my $reffcfile = 'WT_Snf2_deseq_clean_mw_test.tsv';
 my $colp;
@@ -96,7 +96,7 @@ die "No repfiles for test $test\n" if $tests{$test}{repfile} eq '-';
 
 my %jobdat = ();
 for my $truetest (@truetests)
-{ 
+{
   $truetest = $test if $truetest eq 'self';
   die "Unrecognized test $truetest\n" unless defined $tests{$truetest};
 
@@ -113,7 +113,7 @@ for my $truetest (@truetests)
     $dbfile =~ s/tsv$/db/;     # hm...
     print "$dbfile\n";
     next unless -e $dbfile;
-  
+
     $nbatch++;
     printf "\b\b\b%3d", $nbatch;
     my $totfile = "$logdir/" . mktemp("pstat_tot_${test}_${truetest}_n${nrep}_XXXXXX");
@@ -142,32 +142,32 @@ for my $truetest (@truetests)
     push @args, "-reffcfile=$reffcfile" if defined $reffcfile;
     push @args, "-colp=$colp" if defined $colp;
 
-    
-      
-      
+
+
+
     print $script," ",join(" ",@args),"\n";
-      
-    
-      
-      
+
+
+
+
     my ($err, $jt, $diag) = drmaa_allocate_job_template();
     die drmaa_strerror($err) . "\n" . $diag if $err;
-  
+
     drmaa_set_attribute($jt, $DRMAA_NATIVE_SPECIFICATION, "-clear $Q" );
-    drmaa_set_attribute($jt, $DRMAA_REMOTE_COMMAND, $script); 
+    drmaa_set_attribute($jt, $DRMAA_REMOTE_COMMAND, $script);
     drmaa_set_vector_attribute($jt, $DRMAA_V_ARGV, \@args);
     drmaa_set_attribute($jt, $DRMAA_JOB_NAME, $jobname);
     drmaa_set_attribute($jt, $DRMAA_OUTPUT_PATH, ':' . $logdir);
     drmaa_set_attribute($jt, $DRMAA_ERROR_PATH, ':' . $logdir);
     drmaa_set_vector_attribute($jt, $DRMAA_V_ENV, ["PERL5LIB=$ENV{PERL5LIB}"]);
     drmaa_set_attribute($jt, $DRMAA_WD, $cwd);
-    
+
     ($err, my $jobid, $diag) = drmaa_run_job($jt);
     die drmaa_strerror($err) . "\n" . $diag if $err;
-    
+
     push @jobs, $jobid;
   }
-  
+
   $jobdat{$truetest} = [\@reps, $tnsig, $tnnonsig];
 }
 
@@ -202,9 +202,9 @@ print "\n";
 
 print "Aggregating results\n";
 for my $truetest (@truetests)
-{ 
+{
   my $root = "$powerdir/power_${test}_true-${truetest}";
-  my $totfile = "$root.stats";  
+  my $totfile = "$root.stats";
   my $fcfile1 = "${root}_fc1.stats";
   my $fcfile2 = "${root}_fc2.stats";
   my $rocfile = "${root}_roc.stats";
@@ -212,7 +212,7 @@ for my $truetest (@truetests)
   my $propfile = "${root}_sigprop.stats";
   my ($reps, $nsig, $nnonsig) = @{$jobdat{$truetest}};
   my @reps = @$reps;
-  
+
   open PROP, ">$propfile" or die;
   open NSIG, ">$nfile" or die;
   open TOT, ">$totfile" or die;
@@ -233,32 +233,32 @@ for my $truetest (@truetests)
        print "TMP files missing for n=$nrep\n";
        next
     }
-    
+
     open N, $ns or die "Cannot open tmp file $ns\n";
     my $line = <N>;
     print NSIG "$nrep\t$line";
     close N;
     unlink $ns;
-    
+
     open P, $pr or die "Cannot open tmp file $pr\n";
     while(my $line = <P>)
       {print PROP "$nrep\t$line"}
     close P;
     unlink $pr;
-    
-    
+
+
     open T, $tot or die "Cannot open tmp file $tot\n";
     $line = <T>;
     print TOT "$nrep\t$line";
     close T;
     unlink $tot;
-    
+
     open F1, $fc1 or die "Cannot open tmp file $fc1\n";
     while(my $line = <F1>)
       {print FC1 "$nrep\t$line"}
     close F1;
     unlink $fc1;
-    
+
     open F2, $fc2 or die "Cannot open tmp file $fc2\n";
     while(my $line = <F2>)
       {print FC2 "$nrep\t$line"}
@@ -270,7 +270,7 @@ for my $truetest (@truetests)
       {print ROC "$nrep\t$line"}
     close R;
     unlink $roc;
-    
+
   }
   close ROC;
   close FC1;
@@ -279,28 +279,28 @@ for my $truetest (@truetests)
   close PROP;
   print "Created files wih root $root\n";
 }
-print " done\n";  
-  
+print " done\n";
+
 
 
 sub FullNSig
 {
   my (%test) = @_;
-  
+
   my $file = $test{fullfile};
   die "Cannot find file $file\n" unless defined $file && -e $file;
   my $cor = $test{adjustment};
-  
+
   my $p = rcols $file, 2;
-  
+
   # find total number of "real" positives and negatives
   my $mlim = MulticorLimit($p, $cor, $multicor, $alpha);
   my $nsig = nelem($p->where($p <= $mlim));
   my $nnonsig = nelem($p) - $nsig;
-  
+
   #print $p(0:100), "\n";
   #print "$test{name}  $cor  $multicor  $mlim  $nsig\n";die;
-  
+
   return $nsig, $nnonsig
 }
 
