@@ -48,10 +48,6 @@ Modified from MArek's original to simplify the internal hash of counts per repli
 
 =cut
 
-# Log.
-my $logscript = (getpwuid $>)[7] . "/scripts/mylogs.py";
-`python $logscript "$0 @ARGV"`;
-
 
 $| = 1;
 

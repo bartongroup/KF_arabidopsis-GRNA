@@ -109,7 +109,7 @@ modify it under the same terms as Perl itself.
 
 =cut
 
-package CompBio::SpecFun::Beta;
+package Beta;
 require 5.000;
 require Exporter;
 
@@ -207,8 +207,8 @@ sub beta {
     return 1/$a if $b == 1;
 
     # The general case.
-    require CompBio::SpecFun::Gamma;
-    import CompBio::SpecFun::Gamma qw(gammaln);
+    require Gamma;
+    import Gamma qw(gammaln);
     return exp( gammaln($a) + gammaln($b) - gammaln($a+$b) );
 }
 
@@ -231,8 +231,8 @@ sub betaln {
     return -log($a) if $b == 1;
 
     # The general case.
-    require CompBio::SpecFun::Gamma;
-    import CompBio::SpecFun::Gamma qw(gammaln);
+    require Gamma;
+    import Gamma qw(gammaln);
     return gammaln($a) + gammaln($b) - gammaln($a+$b);
 }
 
@@ -259,8 +259,8 @@ sub betainc {
     return 0.5              if $x == 0.5 && $a == $b;
 
     # The general case.
-    require CompBio::SpecFun::Gamma;
-    import CompBio::SpecFun::Gamma qw(gammaln);
+    require Gamma;
+    import Gamma qw(gammaln);
     # Factors in front of the continued fraction.
     my $bt = exp( gammaln($a + $b) - gammaln($a) - gammaln($b)
                   + $a*log($x) + $b*log(1 - $x) );
@@ -294,8 +294,8 @@ sub betaincc {
     return 0.5              if $x == 0.5 && $a == $b;
 
     # The general case.
-    require CompBio::SpecFun::Gamma;
-    import CompBio::SpecFun::Gamma qw(gammaln);
+    require Gamma;
+    import Gamma qw(gammaln);
     # Factors in front of the continued fraction.
     my $bt = exp( gammaln($a + $b) - gammaln($a) - gammaln($b)
                   + $a*log($x) + $b*log(1 - $x) );

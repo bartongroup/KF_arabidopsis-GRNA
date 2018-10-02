@@ -1,4 +1,4 @@
-package CompBio::Normality;
+package Normality;
 
 =head1 NAME
 

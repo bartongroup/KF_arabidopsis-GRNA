@@ -161,7 +161,7 @@ modify it under the same terms as Perl itself.
 
 =cut
 
-package CompBio::SpecFun::Gamma;
+package Gamma;
 require 5.000;
 require Exporter;
 require Carp;

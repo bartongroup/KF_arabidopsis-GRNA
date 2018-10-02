@@ -1,4 +1,4 @@
-#!/sw/bin/perl
+#!${PERLROOT}/bin/perl
 
 =head1 NAME
 
@@ -80,9 +80,9 @@ print "Calculating power statistics for $dbfile using true test from $truefile\n
 
 
 my $db = DBI->connect("DBI:SQLite:dbname=$dbfile", '', '', {AutoCommit => 0, RaiseError => 1})  or die "\nCouldn't open local database: " . DBI->errstr;
-  
+
 my @genes = ReadGeneList($genlist);
-  
+
 my ($f2i, $ptr, $fctr, $sel, $selgenes) = TrueFileIndex($db, $genlist, $truefile);
 my $N = nelem($ptr);
 # f2i is a cross-reference database's feature id -> gene id from genlist
@@ -147,15 +147,15 @@ for my $bs (1 .. $nbs)
 
   $p($f2i($bs_fid)) .= $bs_p;   # reindexing to gene lists's gene order
   $fc($f2i($bs_fid)) .= $bs_fc;
-  
+
   # select only genes present in truefile
   my $psel = $p($sel);
   my $fcsel = $fc($sel);
   $fcsel = $reffc($sel) if defined $reffcfile;
-  
+
   # now ptrsel and psel have the same order and selection
   # so we can compare them directly
-  
+
   #print "N = ", nelem($bs_p), " ",nelem($p), " ", nelem($ptr), "\n";
   #wcols $bs_fid(0:12), $bs_p(0:12);
   #print "f2i=", $f2i(0:12), "\n";
@@ -174,7 +174,7 @@ for my $bs (1 .. $nbs)
   $totstat[$bs - 1] = [$TP, $TN, $FP, $FN];
   #$nsig[$bs - 1] = $TP + $FP;  # all significant genes
   $nsig[$bs - 1] = ($TP + $FP) / ($TP + $TN + $FP + $FN);  # fraction significant genes
-  
+
 #  if($bs == 1)
 #  {
 #    for my $i (0 .. nelem($sel) - 1)
@@ -186,13 +186,13 @@ for my $bs (1 .. $nbs)
 #    }
 #    die;
 #  }
-  
+
   #my $f = 0;
   #for (my $fclim = $fcmin; $fclim <= $fcmax; $fclim += $fcstep)
-  
+
   # power tests for a range of fold-change limits
   # one-sided tests are for fc < fclim, two-sided tests are for fc >= fclim
-  
+
   # one-sided test:
   for my $f (0 .. $fcn1 - 1)
   {
@@ -200,7 +200,7 @@ for my $bs (1 .. $nbs)
     my ($TP, $TN, $FP, $FN) = PowerTest($ptrsel, $psel, $fctrsel, $fcsel, $multicor, $truecor, $dbcor, $fclim, $alpha, 1);
     $fcstat1[$bs - 1][$f] = [$TP, $TN, $FP, $FN];
   }
-  
+
   # two-sided test
   for my $f (0 .. $fcn2 - 1)
   {
@@ -208,7 +208,7 @@ for my $bs (1 .. $nbs)
     my ($TP, $TN, $FP, $FN) = PowerTest($ptrsel, $psel, $fctrsel, $fcsel, $multicor, $truecor, $dbcor, $fclim, $alpha);
     $fcstat2[$bs - 1][$f] = [$TP, $TN, $FP, $FN];
   }
-  
+
   # ROC curves
   for my $f (0 .. $fcnsel - 1)
   {
@@ -217,7 +217,7 @@ for my $bs (1 .. $nbs)
     my @tpr = ();
     #my @tnr = ();
     while($limit < 1)
-    {  
+    {
       #my $fclim = 0 + $fcstep * $f;
       my $fclim = $fcsel[$f];
       my ($TP, $TN, $FP, $FN) = PowerTest($ptrsel, $psel, $fctrsel, $fcsel, $multicor, $truecor, $dbcor, $fclim, $limit);
@@ -260,7 +260,7 @@ close PROP;
 
 # processing fc bootstraps
 # $fcstat has 3 dimensions: 4 x $fcn x $nbs
-# calculating statistics along bootstraps 
+# calculating statistics along bootstraps
 
 open FC1, ">$fcfile1" or die;
 my $fcstat1 = pdl(@fcstat1)->xchg(0,2); # select bootstraps as 1st dimension
@@ -318,14 +318,14 @@ print "Created $totfile, $fcfile1, $fcfile2, $rocfile, $nsigfile and $sigpropfil
 sub TrueFileIndex
 {
   my ($db, $genlist, $file) = @_;
-  
+
   # build gene->index hash for all possible genes
   my @allgenes = ReadGeneList($genlist);
   my $N = @allgenes;
   my %g2i = ();
   for my $i (0 .. $N - 1)
     {$g2i{$allgenes[$i]} = $i}
-  
+
   my $fids = $db->selectall_arrayref("select id, featureID from features") or die;
   print scalar @$fids, " rows read\n";
   my @f2i = ();
@@ -339,13 +339,13 @@ sub TrueFileIndex
     else
       {die "Unidentified gene $gene in features in $dbfile\n"}
   }
-      
+
   local *F;
   my $ptr = zeroes($N) + 1;
   my $fctr = zeroes($N);
   my $is = zeroes($N);
   my @selgenes = ();
-  
+
   open F, $file or die "Cannot open file $file\n";
   my $i=0;
   while(my $line = <F>)
@@ -353,17 +353,17 @@ sub TrueFileIndex
     chomp $line;
     next if $line =~ /^#/;
     next if $line =~ /^gene/i;
-    
+
     my @s = split /\t/, $line;;
     my $gene = $s[0];
     my $fc = $s[$colfc - 1];
     my $p = $s[$colp - 1];
-    
+
     #my ($gene, $fc, $p) = split /\t/, $line;
-    
+
     die "$file: $gene undefined p in line $i $line and file $file\n" unless defined $p;
     $i++;
-    
+
     $p = 1 if $p =~ /NA/;
     $fc = 0 if $fc =~ /NA/;
     $gene =~ s/\"//g;
@@ -373,7 +373,7 @@ sub TrueFileIndex
     if(defined $idx)
     {
       $ptr($idx) .= $p;
-      $fctr($idx) .= $fc; 
+      $fctr($idx) .= $fc;
       $is($idx) .= 1;
       push @selgenes, $gene;
     }
@@ -381,7 +381,7 @@ sub TrueFileIndex
       {die "Unidentified gene $gene in file $truefile\n"}
   }
   my $sel = which($is);
-  
+
   return pdl(@f2i), $ptr, $fctr, $sel, \@selgenes
 }
 
@@ -436,4 +436,3 @@ Full manpage of program.
 =back
 
 =cut
-  

@@ -1,4 +1,4 @@
-#!/sw/bin/perl
+#!${PERLROTOOT}/bin/perl
 
 =head1 NAME
 

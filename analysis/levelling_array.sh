@@ -5,7 +5,7 @@
 
 function usage() {
     echo "Usage:"
-    echo "      $0 -c PREFIX -p PAIRED [-i FASTQDIR] [-o OUTDIR] [-n COUNTSFILE] [-X path/levelling.pl] [-D PROJECTDIR] [-L]"
+    echo "      $0 -c PREFIX -p PAIRED [-i FASTQDIR] [-o OUTDIR] [-n COUNTSFILE] [-X path/levelling.pl] [-D PROJECTDIR]"
     echo "All directories must be relative to PROJECTDIR."
     exit 1
 }
@@ -19,12 +19,10 @@ countsfile='combined_counts/readcount.dat'
 fastqdir='fastq-unlev'
 leveldir='fastq-lev'
 pair=0
-log=false
-scriptsdir='./'
 
 
 # Parse options.
-while getopts 'c:r:n:i:o:p:X:D:L' flag; do
+while getopts 'c:r:n:i:o:p:X:D' flag; do
   case "${flag}" in
     c) cond="${OPTARG}" ;;
     i) fastqdir="${OPTARG}" ;;
@@ -33,7 +31,6 @@ while getopts 'c:r:n:i:o:p:X:D:L' flag; do
     p) pair="${OPTARG}" ;;
     X) tool="${OPTARG}" ;;
     D) project="${OPTARG}" ;;
-    L) log=true ;;
     *) usage ;;
   esac
 done
@@ -42,11 +39,10 @@ done
 [[ -z "$cond" ]] && usage
 
 
-# Log and Execute
-
-command="$tool -c $cond -r $SGE_TASK_ID -p $pair -i ${project}/${fastqdir} -o ${project}/${leveldir} -n ${project}/${countsfile}"
-if [ "$log" = true ] ; then  
-    python "${scriptsdir}/mylogs.py" "$command"
-fi
+# Execute
+command="perl $tool -c $cond -r $SGE_TASK_ID -p $pair -i ${project}/${fastqdir} -o ${project}/${leveldir} -n ${project}/${countsfile}"
 
 $command
+
+
+#eof

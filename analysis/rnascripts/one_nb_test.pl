@@ -1,4 +1,4 @@
-#!/sw/bin/perl
+#!/sw/perl/5.10/bin/perl
 
 =head1 NAME
 
@@ -13,6 +13,11 @@ This scrip is a part of C<grid_launcher_nbtest.pl>.
 
 use strict;
 use warnings;
+
+use lib "$ENV{'PROJECTROOT'}/analysis/grnascripts/Modules";
+use lib "$ENV{'PROJECTROOT'}/analysis/rnascripts";
+#use lib "$ENV{'PERLROOT'}/lib/5.10.1";
+#use lib "$ENV{'PERLROOT'}/lib/site_perl/5.10.1";
 
 use Getopt::Long;
 use Pod::Usage;

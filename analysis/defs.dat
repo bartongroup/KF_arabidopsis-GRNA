@@ -1,4 +1,4 @@
-topdir = /homes/kfroussios/Projects/AtWTdist 
+topdir = /homes/kfroussios/PROJECTS/AtGRNA 
 conditions = AtWT-lev,AtWT-levN,AtWT-levC
 condnames = AtWT,AtWT-noiseless,AtWT-control
 condpairs = AtWT-lev:AtWT-levN,AtWT-lev:AtWT-levC,AtWT-levC:AtWT-levN
@@ -10,7 +10,7 @@ gtffile = genome/At_araport11.gtf
 gfffile = genome/At_araport11.gff3
 genomefile = genome/At_tair10.fa
 starindex = starindex/At_araport11_99bp
-expfile = fastq_unlevelled.list   
+expfile = fastq_unlevelled.list
 fastqdir = fastq-unlev
 levdir = fastq-lev
 samdir = sam-lev

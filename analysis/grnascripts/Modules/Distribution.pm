@@ -113,12 +113,16 @@ sub FitDistr
   my $cmdfit = <<EOF;
 library("MASS")
 x = $cx
-out = fitdistr(x, "$func")
+out = tryCatch(fitdistr(x, "negative binomial"), error=function(cond) return(0))
 EOF
 
   my $cmdout = <<EOF;
-print(out)
-logLik(out)
+if(length(out) > 1) {
+  print(out)
+  logLik(out)
+} else {
+  print("Error")
+}
 warnings()
 EOF
 
@@ -129,7 +133,7 @@ EOF
   #print "\n====\n$out\n======\n";
   
   my @out = split(/\n/, $out);
-  return 0, (error=>$out[0]) if $out[0] =~ /Error/;
+  return 0, (mu=>[0], size=>[0]) if $out[0] =~ /Error/;
 
   my @name = getline(shift @out);
   my @val = getline(shift @out);
@@ -279,8 +283,12 @@ sub GetRMS
   {
     $M = $pars{mu}[0];
     my $r = $pars{size}[0];
-    my $p = $M / ($r + $M);
-    $S = sqrt($p * $r) / (1 - $p);
+    if($M == 0 && $r == 0) {
+      $S = 0
+    } else {
+      my $p = $M / ($r + $M);
+      $S = sqrt($p * $r) / (1 - $p);
+    }
   }
   elsif($func eq 'poisson')
   {
@@ -971,6 +979,7 @@ sub NBBootstrapTest
   my ($loglik, %pars) = FitDistr(floor($x+0.5), 'negative binomial');
   ($m, $s) = GetRMS('negative binomial', %pars);
   #print "$m $s    $M $S  ";
+  return 1 if $m == 0;
   return 0 if $s**2 <= $m;
   my ($bx, $by) = CreateNBinomialTables($m, $s);
   my $crit = 0;

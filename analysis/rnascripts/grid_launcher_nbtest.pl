@@ -38,7 +38,7 @@ my $logdir = "$cwd/NOBACK/nb_test";
 my $batchsize = 30;
 my $ncrit = 30;
 my $maxn = 1e7;
-my $queue = 'c6100.q,64bit-pri.q';
+my $queue = '';
 my $mem = '4000M';
 my $maxmem = '32000M';
 GetMyOptions(
@@ -104,7 +104,7 @@ for my $batch (1 .. $nbatch)
   drmaa_set_attribute($jt, $DRMAA_JOB_NAME, "NB$num");
   drmaa_set_attribute($jt, $DRMAA_OUTPUT_PATH, ':' . $logdir);
   drmaa_set_attribute($jt, $DRMAA_ERROR_PATH, ':' . $logdir);
-  drmaa_set_vector_attribute($jt, $DRMAA_V_ENV, ["PERL5LIB=$ENV{PERL5LIB}", "PATH=$ENV{PATH}"]);
+  drmaa_set_vector_attribute($jt, $DRMAA_V_ENV, ["PROJECTROOT=$ENV{PROJECTROOT}", "PERL5LIB=$ENV{PERL5LIB}", "PATH=$ENV{PATH}", "PERL_LOCAL_LIB_ROOT=$ENV{PERL_LOCAL_LIB_ROOT}", "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}", "PERL_LOCAL_LIB_ROOT=$ENV{PERL_LOCAL_LIB_ROOT}", "PERL_MM_OPT=$ENV{PERL_MM_OPT}"]);
   drmaa_set_attribute($jt, $DRMAA_WD, $cwd);
   
   ($err, my $jobid, $diag) = drmaa_run_job($jt);
