@@ -1,4 +1,4 @@
-#!${PERLROOT}/bin/perl
+#!/usr/bin/perl
 
 =head1 NAME
 
@@ -27,6 +27,9 @@ use Getopt::Long;
 use Pod::Usage;
 
 $| = 1;
+
+open CHKPT,">check.txt";
+print CHKPT "\nCheckpoint 1\n";
 
 my $version = 1.1;
 
@@ -64,6 +67,7 @@ GetOptions(
 pod2usage(-verbose => 2) if $man;
 pod2usage(-verbose => 1) if $help;
 
+print CHKPT "\nCheckpoint 2\n";
 
 die "Need dbfile\n" unless defined $dbfile && -e $dbfile;
 die "Need totfile\n" unless defined $totfile;
@@ -75,6 +79,8 @@ die "Need rocfile\n" unless defined $rocfile;
 die "Need truefile\n" unless defined $truefile;
 die "Truefile $truefile does not exist\n" unless  -e $truefile;
 
+print CHKPT "\nCheckpoint 3\n";
+
 print $created;
 print "Calculating power statistics for $dbfile using true test from $truefile\n";
 
@@ -82,6 +88,8 @@ print "Calculating power statistics for $dbfile using true test from $truefile\n
 my $db = DBI->connect("DBI:SQLite:dbname=$dbfile", '', '', {AutoCommit => 0, RaiseError => 1})  or die "\nCouldn't open local database: " . DBI->errstr;
 
 my @genes = ReadGeneList($genlist);
+
+print CHKPT "\nCheckpoint 4\n"."@genes";
 
 my ($f2i, $ptr, $fctr, $sel, $selgenes) = TrueFileIndex($db, $genlist, $truefile);
 my $N = nelem($ptr);
@@ -105,6 +113,7 @@ $fctrsel = $reffc($sel) if defined $reffcfile;
 
 #wcols $fctr($sel), $reffc($sel);die;
 
+print CHKPT "\nCheckpoint 5\n"."$fctrsel";
 
 my $rows = $db->selectall_arrayref("select featureid, bsid, log2foldchange, significance from DEresults where significance!='NA'") or die;
 my $dat = pdl(@$rows);
@@ -130,6 +139,8 @@ my $fcn2 = ($fcmax - 0) / $fcstep + 1;
 
 my @fcsel = (0, 0.5, 1, 2);
 my $fcnsel = @fcsel;
+
+print CHKPT "\nCheckpoint 6\n"."$fcnsel";
 
 #
 # Bootstrap loop
@@ -235,6 +246,8 @@ for my $bs (1 .. $nbs)
 }
 print "\n";
 
+print CHKPT "\nCheckpoint 7\n";
+
 my $eform = "%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\n";
 
 
@@ -243,6 +256,8 @@ my $eform = "%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\n";
 open SIG, ">$nsigfile" or die;
 print SIG join("\t", @nsig), "\n";
 close SIG;
+
+print CHKPT "\nCheckpoint 8\n";
 
 #processing significant proportion
 
@@ -257,6 +272,8 @@ for my $i (0 .. nelem($sigprop) - 1)
   print PROP "$gene\t$fc\t$prop\n";
 }
 close PROP;
+
+print CHKPT "\nCheckpoint 9\n";
 
 # processing fc bootstraps
 # $fcstat has 3 dimensions: 4 x $fcn x $nbs
@@ -273,6 +290,8 @@ for my $f (0 .. $fcn1 - 1)
 }
 close FC1;
 
+print CHKPT "\nCheckpoint 10\n";
+
 open FC2, ">$fcfile2" or die;
 my $fcstat2 = pdl(@fcstat2)->xchg(0,2); # select bootstraps as 1st dimension
 my ($mfc2, $sfc2) = statsover($fcstat2);  # stats over bootstraps
@@ -284,6 +303,7 @@ for my $f (0 .. $fcn2 - 1)
 }
 close FC2;
 
+print CHKPT "\nCheckpoint 11\n";
 
 # processing total bootstraps
 # $totstat has 2 dimensions: 4 x $nbs
@@ -294,6 +314,8 @@ my $totstat = pdl(@totstat)->xchg(0,1);  # select bootstraps as 1st dimension
 my ($mtot, $stot) = statsover($totstat);
 printf TOT $eform, list($mtot), list($stot);
 close TOT;
+
+print CHKPT "\nCheckpoint 12\n";
 
 # processing ROC bootstraps
 # $rocstats has 4 dimensions: alpha_range x 2 x $fcn x $nbs
@@ -312,6 +334,9 @@ for my $f (0 .. $fcnsel - 1)
   }
 }
 print "Created $totfile, $fcfile1, $fcfile2, $rocfile, $nsigfile and $sigpropfile\n";
+
+print CHKPT "\nCheckpoint 13\n";
+close CHKPT;
 
 #################################################
 

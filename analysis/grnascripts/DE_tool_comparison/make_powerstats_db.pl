@@ -159,7 +159,8 @@ for my $truetest (@truetests)
     drmaa_set_attribute($jt, $DRMAA_JOB_NAME, $jobname);
     drmaa_set_attribute($jt, $DRMAA_OUTPUT_PATH, ':' . $logdir);
     drmaa_set_attribute($jt, $DRMAA_ERROR_PATH, ':' . $logdir);
-    drmaa_set_vector_attribute($jt, $DRMAA_V_ENV, ["PERL5LIB=$ENV{PERL5LIB}"]);
+    drmaa_set_attribute($jt, $DRMAA_WD, ':/homes/kfroussios/PROJECTS/AtGRNA');
+    drmaa_set_vector_attribute($jt, $DRMAA_V_ENV, ["PERL5LIB=$ENV{PERL5LIB}", "PATH=$ENV{PATH}"]);
     drmaa_set_attribute($jt, $DRMAA_WD, $cwd);
 
     ($err, my $jobid, $diag) = drmaa_run_job($jt);
