@@ -1,6 +1,6 @@
 # KF_arabidopsis-GRNA
-Scripts and commands for reproducing the analysis in "How well do RNA-Seq differential gene expression tools perform in a eukaryote with a complex transcriptome?", Froussios, Schurch, Mackinnon, Gierlinski, Duc, Simpson & Barton
-doi: https://doi.org/10.1101/090753
+Scripts and commands for reproducing the analysis in ["How well do RNA-Seq differential gene expression tools perform in a eukaryote with a complex transcriptome?", Froussios, Schurch, Mackinnon, Gierlinski, Duc, Simpson & Barton
+doi:10.1101/090753](https://doi.org/10.1101/090753)
 
 # REQUIREMENTS:
 
@@ -67,7 +67,7 @@ Make the STAR index, align the raw FASTQdata, count the reads mapping to genes.
 	qsub -V -cwd -pe smp 16 -N staral-unlev -t 1-17 ./analysis/star_array.sh -X STAR -c AtWT -i fastq-unlev -a At_araport11.gtf -n At_araport11_99bp -o sam-unlev -t 16
 	python3 ./analysis/fileutilities.py T ./sam-unlev/ --dir final | python3 analysis/sequtilities.py P --StarFinalLogs tab -v > ./sam-unlev/AtWT-unlev_summary.tsv
 	mkdir ./featurecounts-unlev
-	> qsub -V cwd -pe smp 4 -N featCnt-unlev -t 1-17 ./analysis/featureCounts_array.sh -X featureCounts -c AtWT -a At_araport11.gtf -i sam-unlev -o featurecounts-unlev -f exon -g gene_id -r 2 -t 4
+	qsub -V cwd -pe smp 4 -N featCnt-unlev -t 1-17 ./analysis/featureCounts_array.sh -X featureCounts -c AtWT -a At_araport11.gtf -i sam-unlev -o featurecounts-unlev -f exon -g gene_id -r 2 -t 4
 
 Collect all the read counts in a single table to use downstream
 
@@ -123,8 +123,8 @@ With that done we can compute the FDR stats and plot them for the paper...
 Here we downsample the replicates to the lowest replicate so that we can use statistical tests of goodness-of-fit to distributions that that require integer counts. We then Align the data, and get the gene counts (cluding subsetting the replicates for the 'less noisy' set comparison we make in the paper).
 
 	mkdir fastq-lev
-	> python3 ./analysis/fileutilities.py T ./sam-unlev/AtWT-unlev_summary.tsv --cols 0 2 -rl | perl -e 'while(<>){~s/_/\t/g;print}' > ./combined_counts/AtWT_readcount.dat
-	> qsub -cwd -V -t 1-17 ./analysis/levelling_array.sh -X analysis/levelling.pl -c AtWT -p 1 -i fastq-unlev -o fastq-lev -n combined_counts/AtWT_readcount.dat
+	python3 ./analysis/fileutilities.py T ./sam-unlev/AtWT-unlev_summary.tsv --cols 0 2 -rl | perl -e 'while(<>){~s/_/\t/g;print}' > ./combined_counts/AtWT_readcount.dat
+	qsub -cwd -V -t 1-17 ./analysis/levelling_array.sh -X analysis/levelling.pl -c AtWT -p 1 -i fastq-unlev -o fastq-lev -n combined_counts/AtWT_readcount.dat
 	mkdir sam-lev
 	qsub -V -cwd -pe smp 16 -N staral-lev -t 1-17 ./analysis/star_array.sh -X STAR -c AtWT -i fastq-lev -a At_araport11.gtf -n At_araport11_99bp -o sam-lev -t 16
 	mkdir featurecounts-lev
